@@ -27,11 +27,25 @@ designs.addEventListener("change", e => {
   shirtOptions[0].selected = true; // set default selection on every design change to clear pop up menu of existing value
   const theme = e.target.value;
   shirtColors.removeAttribute("disabled");
-  Array.from(shirtOptions).forEach(shirt => {
+  shirtOptions.forEach(shirt => {
     if (shirt.dataset.theme === theme) {
       shirt.style.display = "block";
     } else {
       shirt.style.display = "none";
     }
   });
+});
+
+// Interactive Cost Calculator
+const total = document.getElementById("activities-cost");
+const allActivities = document.querySelectorAll("#activities-box input");
+
+const activities = document.getElementById("activities");
+activities.addEventListener("change", e => {
+  let totalCost = 0;
+
+  allActivities.forEach(activity => {
+    if (activity.checked) totalCost += Number.parseInt(activity.dataset.cost);
+  });
+  total.textContent = `Total: $${totalCost}`;
 });
