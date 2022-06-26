@@ -8,6 +8,10 @@ const activities = document.getElementById("activities");
 const payPal = document.getElementById("paypal");
 const bitCoin = document.getElementById("bitcoin");
 
+// const ccNum = document.getElementById("cc-num");
+// const zip = document.getElementById("zip");
+// const cvv = document.getElementById("cvv");
+
 // make "name" field selected upon load
 name.focus();
 
@@ -19,45 +23,80 @@ bitCoin.style.display = "none";
  * Validators
  */
 function isNameValid() {
-  const isValid = name.value.trim().length > 0;
-  if (!isValid) {
+  const validName = name.value.trim().length > 0;
+  if (!validName) {
     name.parentElement.classList.add("not-valid");
   } else {
     name.parentElement.classList.remove("not-valid");
   }
-  return isValid;
+  return validName;
 }
 
 function isEmailValid() {
-  const isValid = /^\w[\w.-]*@\w[\w.-]*\.[a-z]+$/i.test(email.value);
-  if (!isValid) {
+  const validEmail = /^\w[\w.-]*@\w[\w.-]*\.[a-z]+$/i.test(email.value);
+  if (!validEmail) {
     email.parentElement.classList.add("not-valid");
   } else {
     email.parentElement.classList.remove("not-valid");
   }
-  return isValid;
+  return validEmail;
 }
 
 function hasRegistered() {
-  const isValid = Array.from(allActivities).some(activity => activity.checked);
-  if (!isValid) {
+  const validRegistration = Array.from(allActivities).some(activity => activity.checked);
+  if (!validRegistration) {
     activities.classList.add("not-valid");
   } else {
     activities.classList.remove("not-valid");
   }
-  return;
+  return validRegistration;
 }
 
 function isCreditCardValid() {
   const zip = document.getElementById("zip");
   const cvv = document.getElementById("cvv");
   const cardNumber = document.getElementById("cc-num");
+  const expMonth = document.getElementById("exp-month");
+  const expYear = document.getElementById("exp-year");
 
   const validZip = /\d{5}/.test(zip.value);
-  const validCVV = /\d{3}/.test(cvv.value);
-  const validCCNumber = /\d{13,16}/.test(cardNumber.value);
+  if (!validZip) {
+    zip.parentElement.classList.add("not-valid");
+  } else {
+    zip.parentElement.classList.remove("not-valid");
+  }
 
-  return /\d{5}/.test(zip.value) && /\d{3}/.test(cvv.value) && /\d{13,16}/.test(cardNumber.value);
+  const validCVV = /\d{3}/.test(cvv.value);
+  if (!validCVV) {
+    cvv.parentElement.classList.add("not-valid");
+  } else {
+    cvv.parentElement.classList.remove("not-valid");
+  }
+
+  const validCCNumber = /\d{13,16}/.test(cardNumber.value);
+  if (!validCCNumber) {
+    cardNumber.parentElement.classList.add("not-valid");
+  } else {
+    cardNumber.parentElement.classList.remove("not-valid");
+  }
+
+  const date = new Date();
+  const month = date.getMonth();
+  const year = date.getFullYear();
+
+  if (expYear.value && Number.parseInt(expYear.value) >= year) {
+    expYear.previousElementSibling.classList.remove("not-valid");
+  } else {
+    expYear.previousElementSibling.classList.add("not-valid");
+  }
+
+  if (
+    expMonth.value &&
+    ((expYear.value == year && month + 1 >= Number.parseInt(expMonth.value)) || Number.parseInt(expYear.value))
+  ) {
+  }
+
+  return validZip && validCVV && validCCNumber;
 }
 
 // set "other job" field to not display when job title not "other"
