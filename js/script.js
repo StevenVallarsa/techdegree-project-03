@@ -83,20 +83,29 @@ function isCreditCardValid() {
   const date = new Date();
   const month = date.getMonth();
   const year = date.getFullYear();
+  let validYearMonth;
 
   if (expYear.value && Number.parseInt(expYear.value) >= year) {
     expYear.previousElementSibling.classList.remove("not-valid");
+    validYearMonth = true;
   } else {
     expYear.previousElementSibling.classList.add("not-valid");
+    validYearMonth = false;
   }
 
   if (
     expMonth.value &&
-    ((expYear.value == year && month + 1 >= Number.parseInt(expMonth.value)) || Number.parseInt(expYear.value))
+    (Number.parseInt(expYear.value) > year || (expYear.value == year && month < Number.parseInt(expMonth.value)))
   ) {
+    expMonth.previousElementSibling.classList.remove("not-valid");
+    validYearMonth = true;
+  } else {
+    console.log("HERE");
+    expMonth.previousElementSibling.classList.add("not-valid");
+    validYearMonth = false;
   }
 
-  return validZip && validCVV && validCCNumber;
+  return validZip && validCVV && validCCNumber && validYearMonth;
 }
 
 // set "other job" field to not display when job title not "other"
