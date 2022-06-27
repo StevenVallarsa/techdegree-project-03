@@ -8,10 +8,6 @@ const activities = document.getElementById("activities");
 const payPal = document.getElementById("paypal");
 const bitCoin = document.getElementById("bitcoin");
 
-// const ccNum = document.getElementById("cc-num");
-// const zip = document.getElementById("zip");
-// const cvv = document.getElementById("cvv");
-
 // make "name" field selected upon load
 name.focus();
 
@@ -20,14 +16,21 @@ payPal.style.display = "none";
 bitCoin.style.display = "none";
 
 /**
- * Validators
+ * VALIDATORS
+ *  add "not-valid" class to invalid input
+ *  add "valid" class to valid input
+ *  show "hint" element on invalid input
  */
 function isNameValid() {
   const validName = name.value.trim().length > 0;
   if (!validName) {
     name.parentElement.classList.add("not-valid");
+    name.parentElement.classList.remove("valid");
+    name.nextElementSibling.style.display = "block";
   } else {
     name.parentElement.classList.remove("not-valid");
+    name.parentElement.classList.add("valid");
+    name.nextElementSibling.style.display = "none";
   }
   return validName;
 }
@@ -36,8 +39,12 @@ function isEmailValid() {
   const validEmail = /^\w[\w.-]*@\w[\w.-]*\.[a-z]+$/i.test(email.value);
   if (!validEmail) {
     email.parentElement.classList.add("not-valid");
+    email.parentElement.classList.remove("valid");
+    email.nextElementSibling.style.display = "block";
   } else {
     email.parentElement.classList.remove("not-valid");
+    email.parentElement.classList.add("valid");
+    email.nextElementSibling.style.display = "none";
   }
   return validEmail;
 }
@@ -46,12 +53,15 @@ function hasRegistered() {
   const validRegistration = Array.from(allActivities).some(activity => activity.checked);
   if (!validRegistration) {
     activities.classList.add("not-valid");
+    activities.classList.remove("valid");
   } else {
     activities.classList.remove("not-valid");
+    activities.classList.add("valid");
   }
   return validRegistration;
 }
 
+// validate all credit card input
 function isCreditCardValid() {
   const zip = document.getElementById("zip");
   const cvv = document.getElementById("cvv");
@@ -59,38 +69,56 @@ function isCreditCardValid() {
   const expMonth = document.getElementById("exp-month");
   const expYear = document.getElementById("exp-year");
 
-  const validZip = /\d{5}/.test(zip.value);
+  const validZip = /^\d{5}$/.test(zip.value);
   if (!validZip) {
     zip.parentElement.classList.add("not-valid");
+    zip.parentElement.classList.remove("valid");
+    zip.nextElementSibling.style.display = "block";
   } else {
     zip.parentElement.classList.remove("not-valid");
+    zip.parentElement.classList.add("valid");
+    zip.nextElementSibling.style.display = "";
   }
 
-  const validCVV = /\d{3}/.test(cvv.value);
+  const validCVV = /^\d{3}$/.test(cvv.value);
   if (!validCVV) {
     cvv.parentElement.classList.add("not-valid");
+    cvv.parentElement.classList.remove("valid");
+    cvv.nextElementSibling.style.display = "block";
   } else {
     cvv.parentElement.classList.remove("not-valid");
+    cvv.parentElement.classList.add("valid");
+    cvv.nextElementSibling.style.display = "";
   }
 
-  const validCCNumber = /\d{13,16}/.test(cardNumber.value);
+  const validCCNumber = /^\d{13,16}$/.test(cardNumber.value);
   if (!validCCNumber) {
     cardNumber.parentElement.classList.add("not-valid");
+    cardNumber.parentElement.classList.remove("valid");
+    cardNumber.nextElementSibling.style.display = "block";
   } else {
     cardNumber.parentElement.classList.remove("not-valid");
+    cardNumber.parentElement.classList.add("valid");
+    cardNumber.nextElementSibling.style.display = "";
   }
 
+  // get current date to see if month/year combination is valid
   const date = new Date();
   const month = date.getMonth();
   const year = date.getFullYear();
-  let validYearMonth;
+  let validYear;
+  let validMonth;
 
   if (expYear.value && Number.parseInt(expYear.value) >= year) {
     expYear.previousElementSibling.classList.remove("not-valid");
-    validYearMonth = true;
+    expYear.classList.remove("not-valid");
+    expYear.previousElementSibling.classList.add("valid");
+    validYear = true;
   } else {
     expYear.previousElementSibling.classList.add("not-valid");
-    validYearMonth = false;
+    expYear.classList.add("not-valid");
+    expYear.previousElementSibling.classList.remove("valid");
+    validYear = false;
   }
 
   if (
@@ -98,14 +126,17 @@ function isCreditCardValid() {
     (Number.parseInt(expYear.value) > year || (expYear.value == year && month < Number.parseInt(expMonth.value)))
   ) {
     expMonth.previousElementSibling.classList.remove("not-valid");
-    validYearMonth = true;
+    expMonth.classList.remove("not-valid");
+    expMonth.previousElementSibling.classList.add("valid");
+    validMonth = true;
   } else {
-    console.log("HERE");
     expMonth.previousElementSibling.classList.add("not-valid");
-    validYearMonth = false;
+    expMonth.classList.add("not-valid");
+    expMonth.previousElementSibling.classList.remove("valid");
+    validMonth = false;
   }
 
-  return validZip && validCVV && validCCNumber && validYearMonth;
+  return validZip && validCVV && validCCNumber && validYear && validMonth;
 }
 
 // set "other job" field to not display when job title not "other"
@@ -186,6 +217,25 @@ checkboxes.forEach(checkbox => {
   });
 });
 
+// add change event handler on checkboxes
+checkboxes.forEach(checkbox => {
+  checkbox.addEventListener("change", e => {
+    if (e.target.checked) {
+      checkboxes.forEach(item => {
+        const activity = item.nextElementSibling.textContent;
+        const data = item.dataset.dayAndTime;
+        if (e.target.nextElementSibling.textContent !== activity && e.target.dataset.dayAndTime === data) {
+          item.parentElement.setAttribute("disabled", "disabled");
+          console.log(item.parentElement);
+        } else {
+          // console.log(activity);
+        }
+      });
+    }
+    // console.log(checkbox.nextElementSibling.textContent);
+  });
+});
+
 // validation on submit
 const form = document.querySelector("form");
 form.addEventListener("submit", e => {
@@ -199,6 +249,8 @@ form.addEventListener("submit", e => {
 
   const everythingIsValid = isNameValidCheck && isEmailValidCheck && isRegistrationValidCheck && isCreditCardValidCheck;
 
+  // if there are any invalid inputs don't refresh page
+  // and let user make required changes
   if (!everythingIsValid) {
     e.preventDefault();
     console.log("NOPE");
