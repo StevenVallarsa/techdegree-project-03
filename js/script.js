@@ -35,12 +35,18 @@ function isNameValid() {
   return validName;
 }
 
+// Produce real-time error message on "name" input
+name.addEventListener("keyup", e => {
+  isNameValid();
+});
+
 function isEmailValid() {
   const validEmail = /^\w[\w.-]*@\w[\w.-]*\.[a-z]+$/i.test(email.value);
   if (!validEmail) {
     email.parentElement.classList.add("not-valid");
     email.parentElement.classList.remove("valid");
     email.nextElementSibling.style.display = "block";
+    email.parentElement.lastElementChild.style.display = "block";
   } else {
     email.parentElement.classList.remove("not-valid");
     email.parentElement.classList.add("valid");
@@ -102,7 +108,7 @@ function isCreditCardValid() {
     cardNumber.nextElementSibling.style.display = "";
   }
 
-  // get current date to see if month/year combination is valid
+  // Extra validation on month / year input
   const date = new Date();
   const month = date.getMonth();
   const year = date.getFullYear();
@@ -139,7 +145,8 @@ function isCreditCardValid() {
   return validZip && validCVV && validCCNumber && validYear && validMonth;
 }
 
-// set "other job" field to not display when job title not "other"
+// Set "other job" field to not display when job title not "other"
+// and listen for change to "other" option field
 otherJobRole.style.display = "none";
 
 title.addEventListener("change", e => {
@@ -204,7 +211,7 @@ payment.addEventListener("change", e => {
   }
 });
 
-// focus form
+// Focus form
 const checkboxes = document.querySelectorAll("input[type='checkbox']");
 checkboxes.forEach(checkbox => {
   checkbox.addEventListener("focus", e => {
@@ -217,7 +224,7 @@ checkboxes.forEach(checkbox => {
   });
 });
 
-// add change event handler on checkboxes
+// Add change event handler on checkboxes
 checkboxes.forEach(checkbox => {
   checkbox.addEventListener("change", e => {
     if (e.target.checked) {
@@ -225,18 +232,63 @@ checkboxes.forEach(checkbox => {
         const activity = item.nextElementSibling.textContent;
         const data = item.dataset.dayAndTime;
         if (e.target.nextElementSibling.textContent !== activity && e.target.dataset.dayAndTime === data) {
-          item.parentElement.setAttribute("disabled", "disabled");
-          console.log(item.parentElement);
-        } else {
-          // console.log(activity);
+          item.setAttribute("disabled", "");
+          item.nextElementSibling.style.color = "lightgray";
+        }
+      });
+    } else {
+      checkboxes.forEach(item => {
+        if (item.dataset.dayAndTime === e.target.dataset.dayAndTime) {
+          item.removeAttribute("disabled");
+          item.nextElementSibling.style.color = "black";
         }
       });
     }
-    // console.log(checkbox.nextElementSibling.textContent);
   });
 });
 
-// validation on submit
+/**
+ * Dynamic validation errors on email input
+ *  - insert error messages into DOM under "email" input
+ *  - validate email input on keyup
+ */
+email.parentElement.insertAdjacentHTML(
+  "beforeend",
+  "<p class='email-hint hint' id='email-username'>A username is required at the start of the email address</p>"
+);
+email.parentElement.insertAdjacentHTML(
+  "beforeend",
+  "<p class='email-hint hint' id='email-atsymbol'>An @ symbol is required in the middle of the email address</p>"
+);
+email.parentElement.insertAdjacentHTML(
+  "beforeend",
+  "<p class='email-hint hint' id='email-domain'>A dot domain name is required at the end of the email address</p>"
+);
+
+const username = document.getElementById("email-username");
+const atsymbol = document.getElementById("email-atsymbol");
+const domain = document.getElementById("email-domain");
+
+email.addEventListener("keyup", e => {
+  if (!/^[a-z0-9][\w.-]*/i.test(e.target.value)) {
+    username.style.display = "block";
+  } else {
+    username.style.display = "";
+  }
+  if (!/[a-z0-9]@[a-z0-9]/i.test(e.target.value)) {
+    atsymbol.style.display = "block";
+  } else {
+    atsymbol.style.display = "";
+  }
+  if (!/\.[a-z]+$/i.test(e.target.value)) {
+    domain.style.display = "block";
+  } else {
+    domain.style.display = "";
+  }
+  isEmailValid();
+});
+
+// Run all validations on submit
 const form = document.querySelector("form");
 form.addEventListener("submit", e => {
   const isNameValidCheck = isNameValid();
@@ -249,10 +301,10 @@ form.addEventListener("submit", e => {
 
   const everythingIsValid = isNameValidCheck && isEmailValidCheck && isRegistrationValidCheck && isCreditCardValidCheck;
 
-  // if there are any invalid inputs don't refresh page
-  // and let user make required changes
+  // If there are any invalid inputs the page will
+  // not refresh to let user make required changes
   if (!everythingIsValid) {
     e.preventDefault();
-    console.log("NOPE");
+    console.log("Validation has failed. Please review your input and try again.");
   }
 });
